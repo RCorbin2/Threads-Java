@@ -1,0 +1,123 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Buffer{
+	//variables for consumer and producer Message and location
+	private int producerIndex = 0;
+	private int producerNum = 0;
+	private int consumerIndex = 0;
+	
+	// Data structure in Queue for FIFO with a circular buffer in type ArrayBlockingQueue
+	private final Queue <String> que = new ArrayBlockingQueue<String>(10);
+	
+	// Lock for critical section of program
+	private final Lock lock = new ReentrantLock();
+		
+	//production
+	protected void Produce() throws InterruptedException, IOException{
+		//Loop to wait a random time repeatedly if Queue is full 
+		while (que.size() == 10)
+	    {Thread.sleep(ranNum());}
+	       
+		//locks critical section access
+		lock.lock();
+
+		try {
+			// add string to Queue
+			String message = "Integer: " + producerNum + " at Index: " + producerIndex;
+			que.add(message);
+	       
+			// print string with time to file
+			wPro(timeMS() + " Placed " + message);
+	       
+			//increments message and location
+			producerNum++;
+			producerIndex++;
+	       
+			// sets message to zero after 14
+			if(producerNum == 15) 
+			{producerNum = 0;}
+	       
+			// sets location to 0 after 9
+			if(producerIndex == 10) 
+			{producerIndex = 0;}
+	       
+	     } 
+
+		//unlocks critical section
+		 finally 
+		 {lock.unlock();}
+	  }
+	 
+	// consumption
+	protected void Consume() throws InterruptedException, IOException{
+
+		// loop to wait random time repeatdely if Queue is empty
+		while (que.size() == 0)
+	    {Thread.sleep(ranNum());}
+		 
+		 // Lock for critical section
+		lock.lock();
+		try{	
+
+			// removes object from Queue in FIFO
+			String removed = que.remove();
+			
+			// print to file time and contents removed
+			wCon(timeMS() + " Consumed " + removed);
+	        
+			// increments location
+	        consumerIndex++;
+	        
+	        // sets location to 0 after 9
+	        if(consumerIndex == 10){ 
+            consumerIndex = 0;
+          }
+	        
+	     } 
+			// unlocks critical section
+	     	finally{
+          lock.unlock();
+        }
+	}
+
+	// thread friendly random number generator between 10 - 100
+	public static int ranNum(){
+
+		int random = ThreadLocalRandom.current().nextInt(10,100);
+		return random;
+	}
+	 
+	// function for current time in MS
+	public static String timeMS(){
+
+		long t = System.currentTimeMillis();
+		String currentTime = "Time MS: "+ t + ", ";
+		return currentTime;
+	}
+	
+		// function for FileWriter to append print to producer file and closes it
+	public void wPro(String serve)throws IOException{
+
+		FileWriter filePro = new FileWriter("producer.txt",true);
+    	PrintWriter pro = new PrintWriter(filePro);
+        pro.println(serve);
+        pro.close();
+	}
+	
+	// function for FileWriter to append print to consumer file and closes it
+	public void wCon(String eat) throws IOException{
+
+		FileWriter fileCon = new FileWriter("consumer.txt",true);
+		PrintWriter con = new PrintWriter(fileCon);
+		con.println(eat);
+		con.close();
+	}
+	
+}
