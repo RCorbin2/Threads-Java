@@ -1,0 +1,25 @@
+import java.io.IOException;
+
+public class Consumer extends Buffer implements Runnable{
+
+	Buffer consumer;
+	
+	public Consumer(Buffer numRemove)
+	{this.consumer = numRemove;}
+	
+	// consumer thread that runs while loop with a random wait time between executions
+	public void run(){
+
+		while(true){
+
+			try{
+
+				Thread.sleep(Buffer.ranNum());
+				consumer.Consume();
+			} 
+			catch (InterruptedException | IOException e){
+        System.exit(0);
+      }
+		}
+	}
+}
