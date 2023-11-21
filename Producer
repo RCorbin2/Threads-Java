@@ -1,0 +1,25 @@
+import java.io.IOException;
+
+public class Producer extends Buffer implements Runnable{
+
+	Buffer producer;
+	
+	public Producer(Buffer numAdd)
+	{this.producer = numAdd;}
+	
+	// producer thread that runs while loop with a random wait time between executions
+	public void run(){
+
+		while(true){
+
+			try {
+
+				Thread.sleep(Buffer.ranNum());
+				producer.Produce();
+			}
+			catch (InterruptedException | IOException e) {
+        System.exit(0);
+      }
+		}
+	}
+}
