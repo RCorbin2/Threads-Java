@@ -1,0 +1,53 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class RunThread {
+
+	public static void main(String[] args) throws IOException{
+		//buffer variable
+		Buffer buffer = new Buffer();
+		
+		//new threads for producer and consumer
+		Thread producer = new Thread(new Producer(buffer));
+		Thread consumer = new Thread(new Consumer(buffer));
+		
+		// new files to clear out contents of old files
+		FileWriter clearP = new FileWriter("producer.txt");
+		FileWriter clearC = new FileWriter("consumer.txt");
+		clearP.write("");
+		clearP.close();
+		clearC.write("");
+		clearC.close();
+		
+		System.out.println("Program started and will exit in 15 seconds.");
+		
+		//starts consumer and producer thread
+		producer.start();
+		consumer.start();
+		
+		//starts system exit thread after 15 seconds
+		new RunThread(15000);
+		
+	}
+	
+	// timer variable 
+	Timer systemExit;
+	
+	//constructor for timer in RunThread 
+	public RunThread(int milliseconds){
+		systemExit = new Timer();
+		systemExit.schedule(new mySystemExit(), milliseconds);
+	}
+	
+	// class for running the exit thread
+	class mySystemExit extends TimerTask {
+
+		public void run(){
+			System.out.print("15 Seconds have passed. Program and Threads stopped");
+			System.exit(0);
+		}
+	}
+
+}
